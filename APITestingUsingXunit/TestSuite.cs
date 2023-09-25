@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using APITestingUsingXunit.Constants;
+using APITestingUsingXunit.Utils;
 
 namespace APITestingUsingXunit;
 
@@ -6,24 +7,24 @@ public class TestSuite
 {
 
     private readonly ITestOutputHelper output;
+    private readonly RestClient _client;
 
     public TestSuite(ITestOutputHelper output)
     {
         this.output = output;
+        _client = new RestClient(ApiConstants.BaseUrl);
     }
 
     [Fact]
     public void TestGetMethod()
     {
-
         //Arrange
         //Rest Client     
-        var client = new RestClient("https://jsonplaceholder.typicode.com/");
-        var request = new RestRequest("todos/{id}", Method.Get);
+        var request = TestSuiteUtil.CreateRestRequest("todos/{id}", Method.Get);
         request.AddUrlSegment("id", 3);
 
         //Act
-        var response = client.Execute(request);
+        var response = _client.Execute(request);
 
         //Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -34,13 +35,11 @@ public class TestSuite
         if (!string.IsNullOrEmpty(response.Content))
         {
             var jsonResponse = JsonConvert.DeserializeObject<GetUserResponse>(response.Content);
-
             Assert.NotNull(jsonResponse);
             Assert.Equal(1, jsonResponse.userId);
             Assert.Equal(3, jsonResponse.id);
             Assert.Equal("fugiat veniam minus", jsonResponse.title);
             Assert.False(jsonResponse.Completed);
-
             output.WriteLine($"User ID: {jsonResponse.userId}, User title:{jsonResponse.title}");
         }
         else
@@ -48,11 +47,11 @@ public class TestSuite
             output.WriteLine("Request was not successful. Status code: {0} " + response.StatusCode);
         }
     }
+
     [Fact]
     public void TestPostMethod()
     {
-        var client = new RestClient("https://jsonplaceholder.typicode.com");
-        var request = new RestRequest("posts", Method.Post);
+        var request = TestSuiteUtil.CreateRestRequest("posts", Method.Post);
 
         var requestBody = new PostUserResponse
         {
@@ -62,7 +61,7 @@ public class TestSuite
         };
 
         request.AddJsonBody(requestBody);
-        var response = client.Execute(request);
+        var response = _client.Execute(request);
         var jsonResponse = JsonConvert.DeserializeObject<PostUserResponse>(response.Content);
 
 
@@ -78,8 +77,7 @@ public class TestSuite
     [Fact]
     public void TestPutMethod()
     {
-        var client = new RestClient("https://jsonplaceholder.typicode.com");
-        var request = new RestRequest("todos/{id}", Method.Put);
+        var request = TestSuiteUtil.CreateRestRequest("todos/{id}", Method.Put);
         request.AddUrlSegment("id", 101);
 
 
@@ -91,7 +89,7 @@ public class TestSuite
         };
 
         request.AddJsonBody(requestBody);
-        var response = client.Execute(request);
+        var response = _client.Execute(request);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var jsonResponse = JsonConvert.DeserializeObject<PutUserResponse>(response.Content);
@@ -105,39 +103,14 @@ public class TestSuite
     [Fact]
     public void TestDeleteMethod()
     {
-        var client = new RestClient("https://jsonplaceholder.typicode.com");
-        var request = new RestRequest("todos/{id}", Method.Delete);
+        var request = TestSuiteUtil.CreateRestRequest("todos/{id}", Method.Delete);
         request.AddUrlSegment("id", 13);
 
         // Execute the DELETE request
-        var response = client.Execute(request);
+        var response = _client.Execute(request);
 
         // Assertions for DELETE request
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
     }
-}
-
-
-public class GetUserResponse
-{
-    public int userId { get; set; }
-    public int id { get; set; }
-    public string? title { get; set; }
-    public bool Completed { get; set; }
-}
-
-public class PostUserResponse
-{
-    public int id { get; set; }
-    public string? title { get; set; }
-    public string? body { get; set; }
-    public int userId { get; set; }
-}
-
-public class PutUserResponse
-{
-    public int id { get; set; }
-    public string? title{ get; set; }
-    public bool completed { get; set; }
 }

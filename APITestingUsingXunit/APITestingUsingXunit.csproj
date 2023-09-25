@@ -25,4 +25,14 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Modals\" />
+    <None Remove="Utils\" />
+    <None Remove="Constants\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Modals\" />
+    <Folder Include="Utils\" />
+    <Folder Include="Constants\" />
+  </ItemGroup>
 </Project>
